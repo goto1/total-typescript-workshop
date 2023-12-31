@@ -4,10 +4,6 @@
 
 #### Get the Return Type of a Function
 
-Use the `ReturnType` type helper to construct a type consisting of the return type of a function.
-
-- [ReturnType<Type> | TypeScript: Documentation - Utility Types](https://www.typescriptlang.org/docs/handbook/utility-types.html#returntypetype)
-
 ```ts
 const myFunc = () => {
   return "hello";
@@ -24,10 +20,6 @@ type tests = [Expect<Equal<MyFuncReturn, string>>];
 ```
 
 #### Extract Function Parameters Into A Type
-
-Use the `Parameters` type helper to construct a tuple type from the types used in the parameters of a function type `Type`. This utility type helper is really useful for extracting type information that you don't necessarily have control of, such as code in external libraries.
-
-- [Parameters<Type> | TypeScript: Documentation - Utility Types](https://www.typescriptlang.org/docs/handbook/utility-types.html#parameterstype)
 
 ```ts
 const makeQuery = (
@@ -73,10 +65,6 @@ type tests = [
 
 #### Extract The Awaited Result of a Promise
 
-Use the `Awaited` type helper to model operations like `await` in `async` functions, or the `.then()` method on `Promise`s - specifically, the way they recursively unwrap `Promise`s.
-
-- [Awaited<Type> | TypeScript: Documentation - Utility Types](https://www.typescriptlang.org/docs/handbook/utility-types.html#awaitedtype)
-
 ```ts
 const getUser = () => {
   return Promise.resolve({
@@ -95,10 +83,6 @@ type tests = [
 ```
 
 #### Create a Union Type From an Object's Keys
-
-Use the `keyof` operator, which takes an object type, to produce a string or numeric literal union of its keys.
-
-- [Keyof Type Operator | TypeScript: Documentation - Utility Types](https://www.typescriptlang.org/docs/handbook/2/keyof-types.html)
 
 ```ts
 const testingFrameworks = {
@@ -123,12 +107,6 @@ type tests = [Expect<Equal<TestingFramework, "vitest" | "jest" | "mocha">>];
 
 #### Understand The Terminology Around Unions
 
-A discriminated union has common properties which are used to differentiate between members of the union. In the case below for `type A`, `type` is the discriminator. This common aspect is called the discriminator.
-
-A union type is a way to represent a value that can be one of several types. It allows a variable, parameter, or property to hold values of different types. A union type is expressed using the pipe (`|`) symbol between the types, as seen below for `type B`.
-
-- [Union types | TypeScript: Documentation - Everyday Types](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#union-types)
-
 ```ts
 // Discriminated union
 type A =
@@ -151,10 +129,6 @@ type B = "a" | "b" | "c";
 
 #### Extracting Member of a Discriminated Union
 
-Use the `Extract` type helper to construct a type by extracting from `Type` all union members that are assignable to `Union`.
-
-- [Extract<Type, Union> | TypeScript: Documentation - Utility Types](https://www.typescriptlang.org/docs/handbook/utility-types.html#extracttype-union)
-
 ```ts
 export type Event =
   | {
@@ -176,10 +150,6 @@ type tests = [Expect<Equal<ClickEvent, { type: "click"; event: MouseEvent }>>];
 ```
 
 #### Excluding Parts of a Discriminated Union
-
-Use the `Exclude` type helper to construct a type by excluding from `UnionType` all union members that are assignable to `ExcludedMembers`.
-
-- [Exclude<UnionType, ExcludedMembers> | TypeScript: Documentation - Utility Types](https://www.typescriptlang.org/docs/handbook/utility-types.html#excludeuniontype-excludedmembers)
 
 ```ts
 export type Event =
@@ -211,10 +181,6 @@ type tests = [
 
 #### Extract Object Properties into Individual Types
 
-Use the _indexed access type_ to look up a specific property on another property.
-
-- [Indexed Access Types | TypeScript: Documentation](https://www.typescriptlang.org/docs/handbook/2/indexed-access-types.html)
-
 ```ts
 export const fakeDataDefaults = {
   String: "Default string",
@@ -243,10 +209,6 @@ type tests = [
 
 #### Extract the Discriminator from a Discriminated Union
 
-Use the _indexed access type_ to access parts of a discriminated union.
-
-- [Indexed Access Types | TypeScript: Documentation](https://www.typescriptlang.org/docs/handbook/2/indexed-access-types.html)
-
 ```ts
 export type Event =
   | {
@@ -268,12 +230,6 @@ type tests = [Expect<Equal<EventType, "click" | "focus" | "keydown">>];
 ```
 
 #### Resolve an Object's Values as Literal Types
-
-Use the `const` assertion to signal to the language that:
-
-- no literal types in that expression should be widened (e.g. no going from `"hello"` to `string`)
-- object literals get `readonly` property
-- array literals become `readonly` tuples
 
 ```ts
 export const programModeEnumMap = {
@@ -305,8 +261,6 @@ type tests = [
 ```
 
 #### Create a Union From an Object's Values
-
-Use a union into an indexed access type to get the specific members as another union, or use `Exclude` in an indexed access to exclude members that you _don't_ want, instead of adding all members that you do want.
 
 ```ts
 export const programModeEnumMap = {
@@ -343,8 +297,6 @@ type tests = [
 
 #### Get All of an Object's Values
 
-Use `typeof` and `keyof` operators with indexed access to get all of an object's values.
-
 ```ts
 const frontendToBackendEnumMap = {
   singleModule: "SINGLE_MODULE",
@@ -374,5 +326,123 @@ type Fruit = (typeof fruits)[number];
 type tests = [
   Expect<Equal<AppleOrBanana, "apple" | "banana">>,
   Expect<Equal<Fruit, "apple" | "banana" | "orange">>
+];
+```
+
+### Template Literals
+
+#### Template Literal with Strings
+
+```ts
+type Route = `/${string}`;
+
+export const goToRoute = (route: Route) => {};
+
+// Should succeed:
+
+goToRoute("/users");
+goToRoute("/");
+goToRoute("/admin/users");
+
+// Should error:
+
+// @ts-expect-error
+goToRoute("users/1");
+// @ts-expect-error
+goToRoute("http://facebook.com");
+```
+
+#### Extract Union Strings Matching a Pattern
+
+```ts
+type Routes = "/users" | "/users/:id" | "/posts" | "/posts/:id";
+
+type DynamicRoutes = Extract<Routes, `${string}:${string}`>;
+
+type tests = [Expect<Equal<DynamicRoutes, "/users/:id" | "/posts/:id">>];
+```
+
+#### Creating a Union of Strings with All Possible Permutations of Two Unions
+
+```ts
+type BreadType = "rye" | "brown" | "white";
+type Filling = "cheese" | "ham" | "salami";
+
+type Sandwich = `${BreadType} sandwich with ${Filling}`;
+
+type tests = [
+  Expect<
+    Equal<
+      Sandwich,
+      | "rye sandwich with cheese"
+      | "rye sandwich with ham"
+      | "rye sandwich with salami"
+      | "brown sandwich with cheese"
+      | "brown sandwich with ham"
+      | "brown sandwich with salami"
+      | "white sandwich with cheese"
+      | "white sandwich with ham"
+      | "white sandwich with salami"
+    >
+  >
+];
+```
+
+#### Splitting A String into a Tuple
+
+```ts
+import { S } from "ts-toolbelt";
+
+type Path = "Users/John/Documents/notes.txt";
+
+type SplitPath = S.Split<Path, "/">;
+
+type tests = [
+  Expect<Equal<SplitPath, ["Users", "John", "Documents", "notes.txt"]>>
+];
+```
+
+#### Create an Object Whose Keys Are Derived From a Union
+
+```ts
+type TemplateLiteralKey = `${"user" | "post" | "comment"}${"Id" | "Name"}`;
+
+type ObjectOfKeys = Record<TemplateLiteralKey, string>;
+
+type tests = [
+  Expect<
+    Equal<
+      ObjectOfKeys,
+      {
+        userId: string;
+        userName: string;
+        postId: string;
+        postName: string;
+        commentId: string;
+        commentName: string;
+      }
+    >
+  >
+];
+```
+
+#### Transform String Literals To Uppercase
+
+```ts
+type Event = "log_in" | "log_out" | "sign_up";
+
+type ObjectOfKeys = Record<Uppercase<Event>, string>;
+
+type tests = [
+  Expect<
+    Equal<
+      ObjectOfKeys,
+      {
+        LOG_IN: string;
+        LOG_OUT: string;
+        SIGN_UP: string;
+      }
+    >
+  >
 ];
 ```
