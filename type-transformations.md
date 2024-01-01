@@ -2,6 +2,8 @@
 
 ### Inference Basics
 
+---
+
 #### Get the Return Type of a Function
 
 ```ts
@@ -104,6 +106,8 @@ type tests = [Expect<Equal<TestingFramework, "vitest" | "jest" | "mocha">>];
 ```
 
 ### Unions and Indexing
+
+---
 
 #### Understand The Terminology Around Unions
 
@@ -331,6 +335,8 @@ type tests = [
 
 ### Template Literals
 
+---
+
 #### Template Literal with Strings
 
 ```ts
@@ -446,3 +452,184 @@ type tests = [
   >
 ];
 ```
+
+### Type Helpers
+
+---
+
+#### Create Functions that Return Types
+
+```ts
+type ReturnWhatIPassIn<T> = T;
+
+type tests = [
+  Expect<Equal<ReturnWhatIPassIn<1>, 1>>,
+  Expect<Equal<ReturnWhatIPassIn<"1">, "1">>,
+  Expect<Equal<ReturnWhatIPassIn<true>, true>>,
+  Expect<Equal<ReturnWhatIPassIn<false>, false>>,
+  Expect<Equal<ReturnWhatIPassIn<null>, null>>
+];
+```
+
+#### Creating a Maybe Type Helper
+
+```ts
+type Maybe<T> = T | null | undefined;
+
+type tests = [
+  Expect<Equal<Maybe<string>, string | null | undefined>>,
+  Expect<Equal<Maybe<number>, number | null | undefined>>,
+  Expect<Equal<Maybe<boolean>, boolean | null | undefined>>,
+  Expect<Equal<Maybe<null>, null | undefined>>
+];
+```
+
+#### Ensure Type Safety in a Type Helper
+
+```ts
+type AddRoutePrefix<TRoute extends string> = `/${TRoute}`;
+
+type tests = [
+  Expect<Equal<AddRoutePrefix<"">, "/">>,
+  Expect<Equal<AddRoutePrefix<"about">, "/about">>,
+  Expect<Equal<AddRoutePrefix<"about/team">, "/about/team">>,
+  Expect<Equal<AddRoutePrefix<"blog">, "/blog">>,
+  // @ts-expect-error
+  AddRoutePrefix<boolean>,
+  // @ts-expect-error
+  AddRoutePrefix<number>
+];
+```
+
+#### Create a Reusable Type Helper
+
+```ts
+type CreateDataShape<TData, TError> = {
+  data: TData;
+  error: TError;
+};
+
+type tests = [
+  Expect<
+    Equal<
+      CreateDataShape<string, TypeError>,
+      {
+        data: string;
+        error: TypeError;
+      }
+    >
+  >,
+  Expect<
+    Equal<
+      CreateDataShape<number, Error>,
+      {
+        data: number;
+        error: Error;
+      }
+    >
+  >,
+  Expect<
+    Equal<
+      CreateDataShape<boolean, SyntaxError>,
+      {
+        data: boolean;
+        error: SyntaxError;
+      }
+    >
+  >
+];
+```
+
+#### Optional Type Parameters in Type Helpers
+
+```ts
+type CreateDataShape<TData, TError = undefined> = {
+  data: TData;
+  error: TError;
+};
+
+type tests = [
+  Expect<
+    Equal<
+      CreateDataShape<string>,
+      {
+        data: string;
+        error: undefined;
+      }
+    >
+  >,
+  Expect<
+    Equal<
+      CreateDataShape<boolean, SyntaxError>,
+      {
+        data: boolean;
+        error: SyntaxError;
+      }
+    >
+  >
+];
+```
+
+#### Functions as Constraints for Type Helpers
+
+```ts
+type GetParametersAndReturnType<T extends (...args: any) => any> = {
+  params: Parameters<T>;
+  returnValue: ReturnType<T>;
+};
+
+type tests = [
+  Expect<
+    Equal<
+      GetParametersAndReturnType<() => string>,
+      { params: []; returnValue: string }
+    >
+  >,
+  Expect<
+    Equal<
+      GetParametersAndReturnType<(s: string) => void>,
+      { params: [string]; returnValue: void }
+    >
+  >,
+  Expect<
+    Equal<
+      GetParametersAndReturnType<(n: number, b: boolean) => number>,
+      { params: [number, boolean]; returnValue: number }
+    >
+  >
+];
+```
+
+#### Constraining Types for Anything but null or undefined
+
+```ts
+export type Maybe<T extends {}> = T | null | undefined;
+
+type tests = [
+  // @ts-expect-error
+  Maybe<null>,
+  // @ts-expect-error
+  Maybe<undefined>,
+
+  Maybe<string>,
+  Maybe<false>,
+  Maybe<0>,
+  Maybe<"">
+];
+```
+
+#### Constraining Type Helpers to Non-Empty Arrays
+
+```ts
+type NonEmptyArray<T> = [T, ...Array<T>];
+
+export const makeEnum = (values: NonEmptyArray<string>) => {};
+
+makeEnum(["a"]);
+makeEnum(["a", "b", "c"]);
+
+// @ts-expect-error
+makeEnum([]);
+```
+
+####
