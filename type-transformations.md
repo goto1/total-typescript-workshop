@@ -2,8 +2,6 @@
 
 ### Inference Basics
 
----
-
 #### Get the Return Type of a Function
 
 ```ts
@@ -105,9 +103,9 @@ type TestingFramework = keyof TestingFrameworks;
 type tests = [Expect<Equal<TestingFramework, "vitest" | "jest" | "mocha">>];
 ```
 
-### Unions and Indexing
-
 ---
+
+### Unions and Indexing
 
 #### Understand The Terminology Around Unions
 
@@ -333,9 +331,9 @@ type tests = [
 ];
 ```
 
-### Template Literals
-
 ---
+
+### Template Literals
 
 #### Template Literal with Strings
 
@@ -453,9 +451,9 @@ type tests = [
 ];
 ```
 
-### Type Helpers
-
 ---
+
+### Type Helpers
 
 #### Create Functions that Return Types
 
